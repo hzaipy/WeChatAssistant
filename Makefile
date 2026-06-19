@@ -36,7 +36,8 @@ DYLIB_FLAGS := -dynamiclib \
                -install_name @executable_path/../Frameworks/WeChatAssistant.dylib \
                -framework Foundation \
                -framework AppKit \
-               -framework UserNotifications
+               -framework UserNotifications \
+               -lsqlite3
 
 SOURCES := $(shell find Sources/WeChatAssistant -name '*.m' -type f 2>/dev/null)
 HEADERS := $(shell find Sources/WeChatAssistant -name '*.h' -type f 2>/dev/null)
