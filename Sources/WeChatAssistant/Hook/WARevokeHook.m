@@ -171,7 +171,7 @@ static BOOL WAPatchARM64ReturnYES(uintptr_t address, NSString *desc) {
     for (size_t i = 0; i < gSupportedVersionCount; i++) {
         NSString *sv = [NSString stringWithUTF8String:gSupportedVersions[i].shortVersion];
         NSString *bv = [NSString stringWithUTF8String:gSupportedVersions[i].buildVersion];
-        if ([sv isEqualToString:shortVer] && [bv isEqualToString:buildVersion]) {
+        if ([sv isEqualToString:shortVer] && [bv isEqualToString:buildVer]) {
             WALogInfo(@"✅ 版本匹配: %@ (%@)", sv, bv);
             return &gSupportedVersions[i];
         }
