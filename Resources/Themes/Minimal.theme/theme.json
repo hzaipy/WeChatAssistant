@@ -1,0 +1,18 @@
+{
+  "name": "Minimal",
+  "version": "1.0",
+  "colors": {
+    "background": "#FAFAFA",
+    "darkBackground": "#1A1A1A",
+    "sidebarBackground": "#F0F0F0",
+    "chatBubbleSelf": "#000000",
+    "chatBubbleOther": "#F5F5F5",
+    "textPrimary": "#1A1A1A",
+    "textSecondary": "#777777",
+    "textLink": "#333333",
+    "separator": "#EEEEEE",
+    "highlight": "#000000",
+    "danger": "#FF3B30"
+  },
+  "colorMappings": {}
+}

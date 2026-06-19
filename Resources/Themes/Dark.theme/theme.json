@@ -1,0 +1,18 @@
+{
+  "name": "Dark",
+  "version": "1.0",
+  "colors": {
+    "background": "#1E1E1E",
+    "darkBackground": "#121212",
+    "sidebarBackground": "#252525",
+    "chatBubbleSelf": "#2B5278",
+    "chatBubbleOther": "#3C3C3C",
+    "textPrimary": "#E8E8E8",
+    "textSecondary": "#999999",
+    "textLink": "#7DAFF0",
+    "separator": "#3A3A3A",
+    "highlight": "#07C160",
+    "danger": "#FA5151"
+  },
+  "colorMappings": {}
+}
