@@ -72,7 +72,7 @@ static void replaced_group_event(id self, SEL _cmd, id eventMessage) {
         NSString *eventType = nil;
         if ([eventMessage respondsToSelector:@selector(eventType)]) {
             NSInteger type = [[eventMessage valueForKey:@"eventType"] integerValue];
-            eventType = [WAGroupMonitorHook eventTypeDescription:type];
+            eventType = WAEventTypeDescription(type);
         }
 
         NSString *groupName = nil;
@@ -97,9 +97,9 @@ static void replaced_group_event(id self, SEL _cmd, id eventMessage) {
 }
 
 // ============================================================
-@implementation WAGroupMonitorHook
-
-+ (NSString *)eventTypeDescription:(NSInteger)type {
+// 工具函数
+// ============================================================
+static NSString *WAEventTypeDescription(NSInteger type) {
     switch (type) {
         case 1: return @"成员加入";
         case 2: return @"成员退出";
@@ -109,6 +109,8 @@ static void replaced_group_event(id self, SEL _cmd, id eventMessage) {
         default: return [NSString stringWithFormat:@"群事件(%ld)", (long)type];
     }
 }
+
+@implementation WAGroupMonitorHook
 
 + (BOOL)install {
     if (gInstalled) return YES;
