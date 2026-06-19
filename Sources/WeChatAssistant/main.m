@@ -126,12 +126,12 @@ static void WeChatAssistantInit(void) {
 
     [assistantMenu addItem:[NSMenuItem separatorItem]];
 
-    // --- 主题子菜单 ---
-    NSMenuItem *themeSubItem = [[NSMenuItem alloc] initWithTitle:@"主题"
+    // --- 主题子菜单（四种皮肤模式） ---
+    NSMenuItem *themeSubItem = [[NSMenuItem alloc] initWithTitle:@"皮肤模式"
                                                           action:nil
                                                    keyEquivalent:@""];
-    NSMenu *themeSubMenu = [[NSMenu alloc] initWithTitle:@"主题"];
-    for (NSString *name in [[WAThemeManager sharedManager] availableThemes]) {
+    NSMenu *themeSubMenu = [[NSMenu alloc] initWithTitle:@"皮肤模式"];
+    for (NSString *name in [[WAThemeManager sharedManager] availableThemeNames]) {
         NSMenuItem *tItem = [[NSMenuItem alloc] initWithTitle:name
                                                        action:@selector(wa_selectTheme:)
                                                 keyEquivalent:@""];
@@ -187,7 +187,7 @@ static void WeChatAssistantInit(void) {
 }
 
 + (void)wa_selectTheme:(NSMenuItem *)sender {
-    [[WAThemeManager sharedManager] switchToTheme:sender.title];
+    [[WAThemeManager sharedManager] switchToThemeNamed:sender.title];
 }
 
 + (void)wa_openRevokeHistory {
