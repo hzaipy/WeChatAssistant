@@ -159,6 +159,49 @@ static BOOL WAPatchARM64ReturnYES(uintptr_t address, NSString *desc) {
 }
 
 // ============================================================
+// Sparkle 空操作替换函数（C 函数，供 disableSparkleByRuntimeHook 使用）
+// ============================================================
+static void WAEmptyVoidMethod(id self, SEL _cmd) {
+    WALogDebug(@"已阻止更新方法: %@ %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd));
+}
+
+static BOOL WAReturnNOMethod(id self, SEL _cmd) {
+    WALogDebug(@"已阻止更新方法(BOOL): %@ %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd));
+    return NO;
+}
+
+static void WASwizzleToNoop(Class cls, SEL sel, IMP newIMP, NSString *desc) {
+    if (!cls || !sel) return;
+    Method m = class_getInstanceMethod(cls, sel);
+    if (!m) {
+        WALogDebug(@"更新 Hook 方法未找到: %@", desc);
+        return;
+    }
+    method_setImplementation(m, newIMP);
+    WALogInfo(@"已 Hook 更新方法: %@", desc);
+}
+
+// ============================================================
+// dyld 回调
+// ============================================================
+static void WADyldImageAdded(const struct mach_header *mh, intptr_t vmaddr_slide) {
+    Dl_info info;
+    if (!dladdr(mh, &info) || !info.dli_fname) return;
+
+    NSString *path = [NSString stringWithUTF8String:info.dli_fname];
+    if (![path containsString:@"wechat"] || ![path hasSuffix:@".dylib"]) return;
+
+    WALogInfo(@"📦 wechat.dylib 加载: %@ slide=0x%lx", [path lastPathComponent], vmaddr_slide);
+    gWeChatDylibSlide = vmaddr_slide;
+
+    [WARevokeHook installMultiOpenWithSlide:vmaddr_slide];
+
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kAntiRevoke]) {
+        [WARevokeHook installAntiRevokeWithSlide:vmaddr_slide];
+    }
+}
+
+// ============================================================
 // 版本检测
 // ============================================================
 @implementation WARevokeHook
@@ -259,28 +302,6 @@ static BOOL WAPatchARM64ReturnYES(uintptr_t address, NSString *desc) {
     WALogInfo(@"Sparkle 默认配置已禁用");
 }
 
-// 空操作替换
-static void WAEmptyVoidMethod(id self, SEL _cmd) {
-    WALogDebug(@"已阻止更新方法: %@ %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd));
-}
-
-static BOOL WAReturnNOMethod(id self, SEL _cmd) {
-    WALogDebug(@"已阻止更新方法(BOOL): %@ %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd));
-    return NO;
-}
-
-// Swizzle 实例方法为空操作
-static void WASwizzleToNoop(Class cls, SEL sel, IMP newIMP, NSString *desc) {
-    if (!cls || !sel) return;
-    Method m = class_getInstanceMethod(cls, sel);
-    if (!m) {
-        WALogDebug(@"更新 Hook 方法未找到: %@", desc);
-        return;
-    }
-    method_setImplementation(m, newIMP);
-    WALogInfo(@"已 Hook 更新方法: %@", desc);
-}
-
 // Runtime Hook 阻止 Sparkle
 + (void)disableSparkleByRuntimeHook {
     WALogInfo(@"正在 Hook Sparkle 更新机制...");
@@ -330,28 +351,6 @@ static void WASwizzleToNoop(Class cls, SEL sel, IMP newIMP, NSString *desc) {
             [self disableSparkleByRuntimeHook];
         }
     });
-}
-
-// ============================================================
-// dyld 回调
-// ============================================================
-static void WADyldImageAdded(const struct mach_header *mh, intptr_t vmaddr_slide) {
-    Dl_info info;
-    if (!dladdr(mh, &info) || !info.dli_fname) return;
-
-    NSString *path = [NSString stringWithUTF8String:info.dli_fname];
-    if (![path containsString:@"wechat"] || ![path hasSuffix:@".dylib"]) return;
-
-    WALogInfo(@"📦 wechat.dylib 加载: %@ slide=0x%lx", [path lastPathComponent], vmaddr_slide);
-    gWeChatDylibSlide = vmaddr_slide;
-
-    // 多开必须第一时间 patch
-    [WARevokeHook installMultiOpenWithSlide:vmaddr_slide];
-
-    // 防撤回受用户开关控制
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kAntiRevoke]) {
-        [WARevokeHook installAntiRevokeWithSlide:vmaddr_slide];
-    }
 }
 
 + (void)registerDyldCallback {
