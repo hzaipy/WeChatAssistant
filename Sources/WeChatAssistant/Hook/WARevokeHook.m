@@ -346,6 +346,19 @@ static void WAInstallAntiUpdate(void) {
     WAScanAndPatch();
 }
 
++ (void)registerDyldCallbackOnly {
+    gProfile = WAMatchVersion();
+    if (!gProfile) return;
+    WARegisterDyld();
+    // 延迟扫描，等 wechat.dylib 加载
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        WAScanAndPatch();
+    });
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+        WAScanAndPatch();
+    });
+}
+
 + (BOOL)installMultiOpenWithSlide:(intptr_t)slide { return NO; }
 + (BOOL)installAntiRevokeWithSlide:(intptr_t)slide { return NO; }
 

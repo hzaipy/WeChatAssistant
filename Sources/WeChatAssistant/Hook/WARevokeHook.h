@@ -13,6 +13,9 @@
 + (BOOL)install;
 + (void)uninstall;
 
+/// 仅注册 dyld 回调（不立即扫描，安全模式用）
++ (void)registerDyldCallbackOnly;
+
 /// 单独安装多开（需在 constructor 早期调用）
 + (void)installMultiOpenImmediately;
 

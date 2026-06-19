@@ -98,8 +98,22 @@
 - (void)installSafeHooks {
     WAConfigManager *config = [WAConfigManager sharedManager];
 
-    // 仅安装安全 Hook：禁止更新、退群监控、主题
-    // 跳过防撤回和多开（需要内存补丁，可能崩溃）
+    // 多开：只注册 dyld 回调，等 wechat.dylib 加载后自动 patch
+    // 不立即扫描（避免访问未加载的 dylib 导致崩溃）
+    if ([config isFeatureEnabled:@"multiOpen"]) {
+        WALogInfo(@"注册多开 dyld 回调...");
+        [WARevokeHook registerDyldCallbackOnly];
+        [self.installedHooks addObject:@"multiOpen"];
+        WALogInfo(@"✅ 多开 dyld 回调已注册");
+    }
+
+    // 防撤回：只注册 dyld 回调 + 延迟重试
+    if ([config isFeatureEnabled:@"revokeProtection"]) {
+        WALogInfo(@"注册防撤回 dyld 回调...");
+        [WARevokeHook registerDyldCallbackOnly];
+        [self.installedHooks addObject:@"revokeProtection"];
+        WALogInfo(@"✅ 防撤回 dyld 回调已注册");
+    }
 
     if ([config isFeatureEnabled:@"antiUpdate"]) {
         WALogInfo(@"安装禁止更新...");
