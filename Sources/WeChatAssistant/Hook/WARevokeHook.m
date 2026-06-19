@@ -253,6 +253,7 @@ static void WARegisterDyld(void) {
 // 扫描已加载的 wechat.dylib 并 patch
 // ============================================================
 static void WAScanAndPatch(void) {
+    if (!gProfile) { WALogWarn(@"WAScanAndPatch: 版本不匹配，跳过"); return; }
     uint32_t n = _dyld_image_count();
     for (uint32_t i = 0; i < n; i++) {
         const char *nm = _dyld_get_image_name(i);
@@ -260,10 +261,12 @@ static void WAScanAndPatch(void) {
         NSString *p = @(nm);
         if ([p containsString:@"wechat"] && [p hasSuffix:@".dylib"]) {
             intptr_t s = _dyld_get_image_vmaddr_slide(i);
+            if (s == 0) { WALogWarn(@"wechat.dylib slide=0，跳过"); return; }
             WADyldCallback(NULL, s);
             return;
         }
     }
+    WALogDebug(@"wechat.dylib 尚未加载");
 }
 
 // ============================================================
