@@ -21,6 +21,20 @@ static IMP gOriginalGroupMemberChangeIMP = NULL;
 static IMP gOriginalGroupEventIMP = NULL;
 
 // ============================================================
+// 工具函数（必须在调用它的 C 函数之前定义）
+// ============================================================
+static NSString *WAEventTypeDescription(NSInteger type) {
+    switch (type) {
+        case 1: return @"成员加入";
+        case 2: return @"成员退出";
+        case 3: return @"被移出群聊";
+        case 4: return @"群名变更";
+        case 5: return @"群公告更新";
+        default: return [NSString stringWithFormat:@"群事件(%ld)", (long)type];
+    }
+}
+
+// ============================================================
 // 替换后的群成员变更处理
 // ============================================================
 static void replaced_group_member_change(id self, SEL _cmd, id groupInfo, id memberInfo, NSInteger changeType) {
@@ -93,20 +107,6 @@ static void replaced_group_event(id self, SEL _cmd, id eventMessage) {
     // 继续原始处理
     if (gOriginalGroupEventIMP) {
         ((void(*)(id, SEL, id))gOriginalGroupEventIMP)(self, _cmd, eventMessage);
-    }
-}
-
-// ============================================================
-// 工具函数
-// ============================================================
-static NSString *WAEventTypeDescription(NSInteger type) {
-    switch (type) {
-        case 1: return @"成员加入";
-        case 2: return @"成员退出";
-        case 3: return @"被移出群聊";
-        case 4: return @"群名变更";
-        case 5: return @"群公告更新";
-        default: return [NSString stringWithFormat:@"群事件(%ld)", (long)type];
     }
 }
 
