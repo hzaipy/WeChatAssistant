@@ -10,6 +10,10 @@
 #import "WAConfigManager.h"
 #import "WALogger.h"
 
+@interface WAThemeManager ()
+@property (nonatomic, assign, readwrite) BOOL isEnabled;
+@end
+
 @implementation WAThemeManager
 
 + (instancetype)sharedManager {
