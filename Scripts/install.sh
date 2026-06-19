@@ -116,7 +116,7 @@ while IFS='|' read -r f1 f2 f3 f4; do
     [ -z "$f1" ] && continue
     [[ "$f1" =~ ^[[:space:]]*# ]] && continue
 
-    local display_version short_version build_version note
+    display_version=""; short_version=""; build_version=""; note=""
 
     if [ -n "$f3" ] && is_build_token "$f3"; then
         # 新格式: DisplayVersion|ShortVersion|BuildVersion|Note
