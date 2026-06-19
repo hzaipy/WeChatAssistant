@@ -8,7 +8,9 @@
 
 #import "WAThemePickerController.h"
 #import "WAThemeManager.h"
+#import "WAConfigManager.h"
 #import "WALogger.h"
+#import <objc/runtime.h>
 
 @implementation WAThemePickerController
 
