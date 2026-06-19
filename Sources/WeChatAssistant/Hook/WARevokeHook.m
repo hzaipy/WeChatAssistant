@@ -21,6 +21,7 @@
 #import <mach/mach.h>
 #import <mach-o/dyld.h>
 #import <libkern/OSCacheControl.h>
+#import <dlfcn.h>
 
 // ============================================================
 // 版本适配配置（扩展：加入多开和防更新地址）
@@ -160,7 +161,9 @@ static BOOL WAPatchARM64ReturnYES(uintptr_t address, NSString *desc) {
 // ============================================================
 // 版本检测
 // ============================================================
-+ (const WAWeChatVersionProfile *)matchCurrentVersion {
+@implementation WARevokeHook
+
++ (const void *)matchCurrentVersion {
     NSString *shortVer = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
     NSString *buildVer = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
     WALogInfo(@"当前微信版本: %@ (%@)", shortVer, buildVer);
@@ -194,7 +197,7 @@ static BOOL WAPatchARM64ReturnYES(uintptr_t address, NSString *desc) {
 + (void)installMultiOpenImmediately {
     if (gMultiOpenPatched) return;
 
-    gCurrentProfile = [self matchCurrentVersion];
+    gCurrentProfile = (const WAWeChatVersionProfile *)[self matchCurrentVersion];
     if (!gCurrentProfile) return;
 
     // 扫描已加载的 wechat.dylib
@@ -361,13 +364,11 @@ static void WADyldImageAdded(const struct mach_header *mh, intptr_t vmaddr_slide
 // ============================================================
 // 公开接口
 // ============================================================
-@implementation WARevokeHook
-
 + (BOOL)install {
     if (gInstalled) return YES;
 
     // 1. 版本匹配
-    gCurrentProfile = [self matchCurrentVersion];
+    gCurrentProfile = (const WAWeChatVersionProfile *)[self matchCurrentVersion];
     if (!gCurrentProfile) {
         WALogWarn(@"当前微信版本不支持");
         return NO;
