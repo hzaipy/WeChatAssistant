@@ -38,17 +38,16 @@ static void WeChatAssistantInit(void) {
         WAConfigManager *config = [WAConfigManager sharedManager];
         [config loadConfig];
 
-        WARevokeManager *revokeManager = [WARevokeManager sharedManager];
-        [revokeManager setupDatabase];
-
+        // 先只初始化安全的模块
         WAGroupMonitorManager *groupMonitor = [WAGroupMonitorManager sharedManager];
         [groupMonitor startMonitoring];
 
         WAThemeManager *themeManager = [WAThemeManager sharedManager];
         [themeManager loadCurrentTheme];
 
+        // 只安装安全的 Hook（退群监控 + 禁止更新 + 主题）
         WAHookManager *hookManager = [WAHookManager sharedManager];
-        [hookManager installAllHooks];
+        [hookManager installSafeHooks];
 
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)),
                        dispatch_get_main_queue(), ^{

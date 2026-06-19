@@ -95,6 +95,40 @@
     WALogInfo(@"Hook 安装完成: %@", self.installedHooks);
 }
 
+- (void)installSafeHooks {
+    WAConfigManager *config = [WAConfigManager sharedManager];
+
+    // 仅安装安全 Hook：禁止更新、退群监控、主题
+    // 跳过防撤回和多开（需要内存补丁，可能崩溃）
+
+    if ([config isFeatureEnabled:@"antiUpdate"]) {
+        WALogInfo(@"安装禁止更新...");
+        [WARevokeHook installAntiUpdateIfNeeded];
+        [self.installedHooks addObject:@"antiUpdate"];
+        WALogInfo(@"✅ 禁止更新已安装");
+    }
+
+    if ([config isFeatureEnabled:@"groupMonitor"]) {
+        WALogInfo(@"安装退群监控 Hook...");
+        BOOL ok = [WAGroupMonitorHook install];
+        if (ok) {
+            [self.installedHooks addObject:@"groupMonitor"];
+            WALogInfo(@"✅ 退群监控 Hook 已安装");
+        }
+    }
+
+    if ([config isFeatureEnabled:@"themeManager"]) {
+        WALogInfo(@"安装主题 Hook...");
+        BOOL ok = [WAThemeHook install];
+        if (ok) {
+            [self.installedHooks addObject:@"themeManager"];
+            WALogInfo(@"✅ 主题 Hook 已安装");
+        }
+    }
+
+    WALogInfo(@"安全 Hook 安装完成: %@", self.installedHooks);
+}
+
 - (void)uninstallAllHooks {
     // Method Swizzling 的 Hook 在进程生命周期内无法安全卸载
     // 但可以禁用功能逻辑

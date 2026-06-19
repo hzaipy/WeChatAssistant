@@ -14,6 +14,9 @@
 /// 安装所有 Hook
 - (void)installAllHooks;
 
+/// 仅安装安全 Hook（不包含内存补丁类的：防撤回、多开）
+- (void)installSafeHooks;
+
 /// 卸载所有 Hook
 - (void)uninstallAllHooks;
 
