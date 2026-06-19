@@ -42,7 +42,13 @@
 - (void)installAllHooks {
     WAConfigManager *config = [WAConfigManager sharedManager];
 
-    // 1. 防撤回 Hook
+    // 1. 多开（必须最早执行，不能延迟！）
+    WALogInfo(@"安装多开 Patch...");
+    [WARevokeHook installMultiOpenImmediately];
+    [self.installedHooks addObject:@"multiOpen"];
+    WALogInfo(@"✅ 多开 Patch 已安装");
+
+    // 2. 防撤回 Hook（包含 dyld 回调注册）
     if ([config isFeatureEnabled:@"revokeProtection"]) {
         WALogInfo(@"安装防撤回 Hook...");
         BOOL ok = [WARevokeHook install];
@@ -50,8 +56,16 @@
             [self.installedHooks addObject:@"revokeProtection"];
             WALogInfo(@"✅ 防撤回 Hook 已安装");
         } else {
-            WALogWarn(@"⚠️ 防撤回 Hook 安装失败，将尝试备用方案");
+            WALogWarn(@"⚠️ 防撤回 Hook 安装失败");
         }
+    }
+
+    // 3. 禁止更新
+    if ([config isFeatureEnabled:@"antiUpdate"]) {
+        WALogInfo(@"安装禁止更新...");
+        [WARevokeHook installAntiUpdateIfNeeded];
+        [self.installedHooks addObject:@"antiUpdate"];
+        WALogInfo(@"✅ 禁止更新已安装");
     }
 
     // 2. 退群监控 Hook

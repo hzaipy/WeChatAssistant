@@ -106,6 +106,18 @@ static void WeChatAssistantInit(void) {
     [assistantMenu addItem:[NSMenuItem separatorItem]];
 
     // --- 功能开关 ---
+    NSMenuItem *multiOpenItem = [[NSMenuItem alloc] initWithTitle:@"✅ 多开"
+                                                          action:@selector(wa_toggleMultiOpen)
+                                                   keyEquivalent:@""];
+    multiOpenItem.target = [self class];
+    [assistantMenu addItem:multiOpenItem];
+
+    NSMenuItem *antiUpdateItem = [[NSMenuItem alloc] initWithTitle:@"✅ 禁止更新"
+                                                            action:@selector(wa_toggleAntiUpdate)
+                                                     keyEquivalent:@""];
+    antiUpdateItem.target = [self class];
+    [assistantMenu addItem:antiUpdateItem];
+
     NSMenuItem *revokeItem = [[NSMenuItem alloc] initWithTitle:@"✅ 消息防撤回"
                                                         action:@selector(wa_toggleRevoke)
                                                  keyEquivalent:@""];
@@ -118,7 +130,7 @@ static void WeChatAssistantInit(void) {
     groupItem.target = [self class];
     [assistantMenu addItem:groupItem];
 
-    NSMenuItem *themeItem = [[NSMenuItem alloc] initWithTitle:@"✅ 主题更换"
+    NSMenuItem *themeItem = [[NSMenuItem alloc] initWithTitle:@"✅ 皮肤模式"
                                                        action:@selector(wa_toggleTheme)
                                                 keyEquivalent:@""];
     themeItem.target = [self class];
@@ -171,6 +183,18 @@ static void WeChatAssistantInit(void) {
     [[NSNotificationCenter defaultCenter] postNotificationName:@"WAOpenPreferences" object:nil];
 }
 
++ (void)wa_toggleMultiOpen {
+    BOOL enabled = [[WAConfigManager sharedManager] toggleFeature:@"multiOpen"];
+    WALogInfo(@"多开: %@", enabled ? @"开启" : @"关闭");
+    [self showRestartAlert:@"多开" enabled:enabled];
+}
+
++ (void)wa_toggleAntiUpdate {
+    BOOL enabled = [[WAConfigManager sharedManager] toggleFeature:@"antiUpdate"];
+    WALogInfo(@"禁止更新: %@", enabled ? @"开启" : @"关闭");
+    [self showRestartAlert:@"禁止更新" enabled:enabled];
+}
+
 + (void)wa_toggleRevoke {
     BOOL enabled = [[WAConfigManager sharedManager] toggleFeature:@"revokeProtection"];
     WALogInfo(@"防撤回: %@", enabled ? @"开启" : @"关闭");
@@ -197,8 +221,21 @@ static void WeChatAssistantInit(void) {
 + (void)wa_showAbout {
     NSAlert *alert = [[NSAlert alloc] init];
     alert.messageText = @"微信助手 WeChatAssistant";
-    alert.informativeText = @"版本 1.0.0\n\nmacOS 微信增强助手\n• 消息防撤回\n• 退群监控\n• 主题更换\n\n仅支持 Apple Silicon (M1/M2/M3/M4)\n微信 4.1.x 系列";
+    alert.informativeText = @"版本 1.0.0\n\nmacOS 微信增强助手\n• 多开\n• 禁止更新\n• 消息防撤回\n• 退群监控\n• 皮肤模式（迷离/黑夜/上帝/少女）\n\n仅支持 Apple Silicon (M1/M2/M3/M4)\n微信 4.1.x 系列\n\n借鉴项目:\n• SovietExtension (4.x 防撤回+多开)\n• WeChatExtension-ForMac (皮肤方案)";
     alert.alertStyle = NSAlertStyleInformational;
     [alert addButtonWithTitle:@"确定"];
     [alert runModal];
+}
+
++ (void)showRestartAlert:(NSString *)featureName enabled:(BOOL)enabled {
+    if (!enabled) return; // 关闭不需要重启
+    NSAlert *alert = [[NSAlert alloc] init];
+    alert.messageText = [NSString stringWithFormat:@"%@ 已开启", featureName];
+    alert.informativeText = @"重启微信后生效";
+    [alert addButtonWithTitle:@"稍后重启"];
+    [alert addButtonWithTitle:@"立即重启"];
+    NSModalResponse resp = [alert runModal];
+    if (resp == NSAlertSecondButtonReturn) {
+        system("killall WeChat && open /Applications/WeChat.app");
+    }
 }
