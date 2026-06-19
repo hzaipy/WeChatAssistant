@@ -93,11 +93,16 @@ WeChatAssistant/
 
 ### 微信 4.1.x 适配策略
 
-微信 4.x 采用 QT + C++ 重构，丧失了部分 OC Runtime 特性。我们采用混合策略：
+微信 4.x 采用 QT + C++ 重构，丧失了部分 OC Runtime 特性。我们采用 **dyld 回调 + ARM64 内存补丁** 方案（借鉴 SovietExtension）：
 
-1. **Method Swizzling** - 对有 Runtime 暴露的方法进行 Hook
-2. **动态类/方法发现** - 遍历所有微信类，搜索目标方法
-3. **二进制补丁** - 对关键函数直接修改 ARM64 汇编指令（参考 WeChatTweak）
+1. **dyld 回调监听** - `_dyld_register_func_for_add_image` 监听 `wechat.dylib` 加载
+2. **ASLR Slide 计算** - 运行时地址 = slide + 静态虚拟地址
+3. **内存补丁** - `vm_protect` 修改页权限，写入 ARM64 跳转指令
+4. **版本适配表** - 不同微信版本使用不同 Hook 模式（Pointer / Inline）
+
+已适配版本：
+- 微信 4.1.9.58 (268602) - Pointer Hook
+- 微信 4.1.10.53 (268853) - Inline Hook
 
 ## 常见问题
 
@@ -133,7 +138,8 @@ make clean
 
 本项目参考了以下优秀开源项目：
 
-- [WeChatTweak](https://github.com/sunnyyoung/WeChatTweak) - 微信防撤回与多开
+- [SovietExtension](https://github.com/MustangYM/SovietExtension) - **主要参考**，微信 4.x 防撤回 dyld 回调 + ARM64 内存补丁方案
+- [WeChatTweak](https://github.com/sunnyyoung/WeChatTweak) - 微信防撤回与多开先驱
 - [WeChatPlugin-MacOS](https://github.com/TKkk-iOSer/WeChatPlugin-MacOS) - 微信功能插件
 - [WeChatExtension-ForMac](https://github.com/MustangYM/WeChatExtension-ForMac) - Mac 微信功能拓展
 

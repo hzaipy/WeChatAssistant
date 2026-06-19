@@ -1,0 +1,15 @@
+# WeChatAssistant 支持的微信版本列表
+# 仅支持 Apple Silicon (arm64) M 芯片
+# 
+# 格式：DisplayVersion|CFBundleShortVersionString|CFBundleVersion|Note
+#
+# 字段说明：
+# 1. DisplayVersion: 对外展示的精确版本
+# 2. CFBundleShortVersionString: Info.plist 中的短版本号
+# 3. CFBundleVersion: Info.plist 中的构建版本号
+# 4. Note: 备注（Hook 模式等）
+#
+# 参考：SovietExtension by MustangYM
+
+4.1.9.58|4.1.9|268602|Pointer Hook 模式
+4.1.10.53|4.1.10|268853|Inline Hook 模式
