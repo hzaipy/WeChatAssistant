@@ -19,7 +19,14 @@ else
   CAN_BUILD := false
 endif
 
-OBJC_FLAGS := -ObjC -fobjc-arc -mmacosx-version-min=12.0
+OBJC_FLAGS := -ObjC -fobjc-arc -mmacosx-version-min=12.0 \
+              -I Sources/WeChatAssistant \
+              -I Sources/WeChatAssistant/Hook \
+              -I Sources/WeChatAssistant/Managers \
+              -I Sources/WeChatAssistant/Models \
+              -I Sources/WeChatAssistant/Views \
+              -I Sources/WeChatAssistant/WindowControllers \
+              -I Sources/WeChatAssistant/Utils
 ifdef SDKROOT
   OBJC_FLAGS += -isysroot $(SDKROOT)
 endif
